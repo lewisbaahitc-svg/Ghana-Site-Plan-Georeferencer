@@ -1,0 +1,25 @@
+PUBLIC USE LICENCE AND ATTRIBUTION TERMS
+
+Software: Ghana Site Plan Georeferencer
+Copyright © 2026 Engr. Baah Lewis. All Rights Reserved.
+
+1. PERMITTED USE
+The software is made available for worldwide lawful public use. Users may run the official software, use its outputs, and share the official page or an unmodified copy for legitimate purposes.
+
+2. OWNERSHIP
+Use of this software does not transfer copyright, authorship, ownership, or attribution to any user, organisation, website, company, or other party.
+
+3. ATTRIBUTION
+The name "Engr. Baah Lewis" and the copyright notice must remain visible and must not be removed, obscured, falsified, or replaced when the software is copied, shared, embedded, or redistributed.
+
+4. NO CLAIM OF AUTHORITY
+No person may present the software as their own original creation or falsely claim authorship of the Ghana Site Plan Georeferencer.
+
+5. COMMERCIAL REDISTRIBUTION
+Commercial redistribution, white-labelling, resale, or incorporation into another commercial software product is not granted by this public-use notice unless separately authorised in writing by the copyright owner.
+
+6. THIRD-PARTY MATERIALS
+Leaflet, map services, imagery, OpenStreetMap data, Esri imagery, APIs, and other third-party materials are not owned by Engr. Baah Lewis and remain governed by their respective licences and terms.
+
+7. NO GUARANTEE
+The software is provided as a practical georeferencing and mapping aid. Important survey or engineering results should be independently checked against authoritative control and applicable professional requirements.

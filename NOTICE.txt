@@ -1,0 +1,9 @@
+AUTHORSHIP AND PROVENANCE NOTICE
+
+Project: Ghana Site Plan Georeferencer
+Creator/Developer: Engr. Baah Lewis
+Copyright: © 2026 Engr. Baah Lewis. All Rights Reserved.
+
+The creator attribution is embedded in the HTML source, document metadata, visible interface, About/Credits section, and footer.
+
+The official publication should preserve the Git/GitHub commit history and this notice as evidence of the project's published provenance.

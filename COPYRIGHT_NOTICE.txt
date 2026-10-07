@@ -1,0 +1,12 @@
+COPYRIGHT NOTICE
+
+Ghana Site Plan Georeferencer
+Copyright © 2026 Engr. Baah Lewis. All Rights Reserved.
+
+Created and developed by Engr. Baah Lewis.
+
+This notice identifies the authorship and copyright claim associated with the software. Public access or permission to use the software does not transfer ownership or authorship to another person or organisation.
+
+Users may use and share the official software for lawful purposes, subject to the accompanying public-use terms. The copyright notice and creator attribution must not be removed or replaced with another person's authorship claim.
+
+Third-party libraries, map services, imagery, data and APIs remain subject to their respective licences and terms.

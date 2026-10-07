@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="author" content="Engr. Baah Lewis">
+<meta name="copyright" content="Copyright © 2026 Engr. Baah Lewis. All Rights Reserved.">
+<meta name="description" content="Ghana Site Plan Georeferencer — created and developed by Engr. Baah Lewis.">
+<!--
+  COPYRIGHT / AUTHORSHIP NOTICE
+  Copyright © 2026 Engr. Baah Lewis. All Rights Reserved.
+  Ghana Site Plan Georeferencer was created and developed by Engr. Baah Lewis.
+  Free public use is permitted subject to the accompanying public-use notice.
+  Do not remove, obscure, or replace this authorship attribution.
+  Third-party libraries, map services, imagery and APIs remain subject to their own licences and terms.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ghana Site Plan Georeferencer — Engr. Baah Lewis | Version 3 Engine</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f5f7;color:#17202a}
+header{background:#17324d;color:#fff;padding:18px}.wrap{max-width:1150px;margin:auto;padding:14px}
+h1{font-size:22px;margin:0 0 4px}.sub{opacity:.9;font-size:13px}.card{background:#fff;border:1px solid #d9e0e6;border-radius:12px;padding:15px;margin:12px 0;box-shadow:0 1px 2px #0000000a}
+.step{font-weight:800;font-size:16px;margin-bottom:8px}.small{font-size:12px;color:#58636d}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}input,select,button{font:inherit}
+input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border:1px solid #b9c4cf;border-radius:8px;background:#fff}textarea{resize:vertical;font-family:Consolas,monospace;font-size:12px}
+button{border:0;border-radius:8px;padding:10px 13px;background:#17324d;color:white;cursor:pointer;margin:3px}button.secondary{background:#e8edf2;color:#17202a}button.warn{background:#8b5e00}
+button:disabled{opacity:.45;cursor:not-allowed}.badge{display:inline-block;background:#eef3f7;padding:5px 8px;border-radius:999px;font-size:11px;margin:3px}
+#cv{width:100%;max-height:720px;border:1px solid #cfd7de;background:#111;touch-action:none}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid #e3e7eb;padding:7px;text-align:right}th:first-child,td:first-child{text-align:left}
+.status{padding:9px;border-radius:8px;background:#eef6ff;margin-top:8px;font-size:13px}.credit{font-size:12px;color:#667}
+.note{background:#fff9e8;border-left:4px solid #b07b00;padding:10px;font-size:12px}
+#map{width:100%;height:520px;border:1px solid #cfd7de;border-radius:10px;background:#e9eef2;overflow:hidden}
+.leaflet-container{width:100%;height:100%;font-family:Arial,sans-serif}
+.leaflet-tile{max-width:none !important}
+.mapToolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end}.mapToolbar>div{flex:1 1 280px}
+.mapLegend{font-size:12px;color:#58636d;margin-top:8px}
+
+.magnifier{display:none;position:fixed;z-index:50;width:190px;height:190px;background:#fff;border:2px solid #17324d;border-radius:12px;box-shadow:0 6px 22px rgba(0,0,0,.22);pointer-events:none;overflow:hidden}.magnifier canvas{width:180px!important;height:180px!important;border:0!important;border-radius:10px!important;display:block}.magCenter{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border:2px solid #d71920;border-radius:50%;box-shadow:0 0 0 1px #fff}.magCenter:before,.magCenter:after{content:"";position:absolute;background:#d71920;left:50%;top:50%;transform:translate(-50%,-50%)}.magCenter:before{width:34px;height:2px}.magCenter:after{height:34px;width:2px}
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2.15.0/dist/proj4.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Ghana Site Plan Georeferencer</h1>
+<div class="sub">Professional Version 3 Engine • Created and developed by <b>Engr. Baah Lewis</b> • © 2026 Engr. Baah Lewis • Free public use with attribution</div>
+<div style="margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.35);border-radius:8px;font-size:12px;background:rgba(255,255,255,.08)"><b>AUTHORSHIP &amp; COPYRIGHT:</b> © 2026 Engr. Baah Lewis. This software is made available for public use; authorship and attribution remain with Engr. Baah Lewis.</div>
+</div></header>
+<div class="wrap">
+
+<div class="card">
+<div class="step">1. Project information & coordinate system</div>
+<div id="netStatus" class="status">Connection mode: checking…</div>
+<div class="grid">
+<div><label>Project / Site name</label><input id="project" type="text" placeholder="e.g. Accra Plot 12"></div>
+<div><label>Prepared by</label><input id="prepared" type="text" value="Engr. Baah Lewis"></div>
+<div><label>Coordinate system</label>
+<select id="crs">
+<option value="ghana_metric">Ghana Metre Grid / Leigon (EPSG:25000) — metres</option>
+<option value="ghana_ng">Ghana National Grid / Accra Datum (EPSG:2136) — Gold Coast feet</option>
+<option value="utm30">WGS 84 / UTM Zone 30N (EPSG:32630) — metres</option>
+<option value="utm31">WGS 84 / UTM Zone 31N (EPSG:32631) — metres</option>
+<option value="geographic">Geographic latitude/longitude — degrees</option>
+<option value="custom">Custom / user-calibrated grid units</option>
+</select></div>
+<div><label>Grid unit</label><select id="unit"><option value="m">metres</option><option value="ft">feet</option></select></div>
+</div>
+<div class="small">Select the CRS that actually applies to the plan. Do not assume the grid system from appearance alone.</div>
+<div style="margin-top:8px"><span class="badge">Core processing: offline</span><span class="badge">Online services: optional</span></div>
+</div>
+
+<div class="card">
+<div class="step">2. Coordinate conversion & CAD output</div>
+<p class="small">The traced coordinates can be displayed/exported in another system. For UTM, latitude/longitude is required as the conversion source. For Ghana grids, the datum and grid definition must match the plan.</p>
+<div class="grid">
+<div><label>Output coordinate system</label>
+<select id="outCrs">
+<option value="same">Same as source</option>
+<option value="utm30">WGS 84 / UTM Zone 30N (EPSG:32630)</option>
+<option value="utm31">WGS 84 / UTM Zone 31N (EPSG:32631)</option>
+<option value="geographic">WGS 84 latitude/longitude</option>
+<option value="ghana_metric">Ghana Metre Grid / Leigon (EPSG:25000)</option>
+<option value="ghana_ng">Ghana National Grid / Accra Datum (EPSG:2136)</option>
+</select></div>
+<div><label>CAD drawing units</label>
+<select id="cadUnit"><option value="m">metres</option><option value="ft">feet</option></select></div>
+</div>
+<div id="geoInput" style="display:none;margin-top:10px" class="grid">
+<div><label>Reference latitude (WGS84)</label><input id="refLat" type="number" step="any" placeholder="e.g. 5.6037"></div>
+<div><label>Reference longitude (WGS84)</label><input id="refLon" type="number" step="any" placeholder="e.g. -0.1870"></div>
+</div>
+<button id="convert">Convert output</button>
+<button id="dxf" class="secondary">Export AutoCAD DXF</button>
+<div id="conversionStatus" class="status">Choose an output system and complete a boundary.</div>
+</div>
+
+<div class="card">
+<div class="step">3. Coordinate consistency check</div>
+<p class="small">Before placing the points on the satellite map, this check compares the entered control coordinates under the two main Ghana grid interpretations. It does not change your survey coordinates.</p>
+<div id="crsCheck" class="status">Add at least 3 control points to run the check.</div>
+<div class="note"><b>Important:</b> If your plan has Eastings around 1,300,000 and Northings around 419,000, Ghana National Grid / Accra Datum (EPSG:2136) is the first system to test. Ghana Metre Grid (EPSG:25000) gives a very different geographic position for those same numbers.</div>
+</div>
+
+<div class="card">
+<div class="step">3. Online satellite / map verification — no Google API key required</div>
+<p class="small">This version uses public web map tiles for visual verification. Satellite imagery is supplied by Esri World Imagery; the normal map uses OpenStreetMap. No Google Maps API key is required.</p>
+<div class="mapToolbar">
+<div><label>Background</label><select id="mapType"><option value="satellite">Satellite imagery</option><option value="hybrid">Satellite + roads/labels</option><option value="osm">OpenStreetMap</option></select></div>
+<div><button id="loadMap" type="button">Load map</button><button id="fitMap" type="button" class="secondary">Fit boundary</button></div>
+</div>
+<div class="card" style="margin:10px 0 10px 0;border-color:#b9cfe3;background:#f7fbff">
+<div class="step" style="font-size:14px">Manual coordinate plotting on the satellite map</div>
+<p class="small">After georeferencing and tracing your boundary, copy the generated coordinates and paste them here. You can paste one point or several points. Use one point per line, in <b>Easting, Northing</b> order, or choose latitude/longitude below. The program will plot exactly those coordinates on the satellite map without recalculating the site-plan image.</p>
+<div class="grid">
+<div><label>Coordinates to plot</label><select id="plotCrs">
+<option value="same">Same as selected source CRS</option>
+<option value="ghana_metric">Ghana Metre Grid / Leigon (EPSG:25000)</option>
+<option value="ghana_ng">Ghana National Grid / Accra Datum (EPSG:2136)</option>
+<option value="utm30">WGS 84 / UTM Zone 30N (EPSG:32630)</option>
+<option value="utm31">WGS 84 / UTM Zone 31N (EPSG:32631)</option>
+<option value="geographic">WGS84 latitude,longitude</option>
+</select></div>
+<div><label>Paste coordinates</label><textarea id="plotCoords" rows="5" placeholder="Easting,Northing
+1303000,419000
+1303050,419020
+1303100,419010"></textarea></div>
+</div>
+<button id="plotManual" type="button">Plot coordinates on satellite</button><div id="plotCleanNote" class="status">Plot box accepts clean coordinate pairs only: <b>Easting, Northing</b> (one pair per line), or <b>latitude, longitude</b> for WGS84. Do not paste distance, bearing or area.</div>
+<button id="clearManual" type="button" class="secondary">Clear plotted coordinates</button>
+<button id="copyBoundaryToPlot" type="button" class="secondary">Copy traced boundary into plotting box</button>
+<div id="plotStatus" class="status">Paste your coordinates above, then click “Plot coordinates on satellite”.</div>
+</div>
+<div id="mapStatus" class="status">Click “Load map” while connected to the internet. No API key is needed. You can also manually paste coordinates above and plot them.</div>
+<div id="map"></div>
+<div class="mapLegend">Imagery: Esri World Imagery and its credited data providers. Map data: © OpenStreetMap contributors. The red boundary comes from your georeferencing controls and is not altered by the background imagery.</div>
+</div>
+
+<div class="card">
+<div class="step">4. Load the site-plan photograph</div>
+<input id="file" type="file" accept="image/jpeg,image/png,image/webp">
+<div id="status" class="status">Load a JPG, PNG or WebP photograph to begin.</div>
+</div>
+
+<div class="card">
+<div class="step">5. Georeference using control points</div>
+<p class="small">Enter a known Easting/Northing from the plan, click <b>Add control</b>, then click the matching grid intersection on the image. Use at least 4 well-spaced points, preferably near the corners. Four or more points enable perspective correction.</p>
+<div class="grid">
+<div><label>Known Easting</label><input id="e" type="number" step="any"></div>
+<div><label>Known Northing</label><input id="n" type="number" step="any"></div>
+</div>
+<button id="addControl">Add control → click image</button>
+<button id="undoControl" class="secondary">Undo control</button>
+<button id="clearControls" class="secondary">Clear controls</button>
+<div id="controlsList" class="small">No control points yet.</div>
+</div>
+
+<div class="card">
+<div class="step">6. Trace the parcel boundary</div>
+<p class="small">After calibration, click parcel corners in order. The output boundary is highlighted in red.</p>
+<button id="trace" disabled>Start boundary tracing</button>
+<button id="closePoly" disabled>Close boundary</button>
+<button id="undoPoly" class="secondary" disabled>Undo boundary point</button>
+<button id="clearPoly" class="secondary">Clear boundary</button>
+</div>
+
+<div class="card"><canvas id="cv"></canvas><div class="small">Blue = control points • Red = parcel boundary. When placing a point, a precision crosshair follows your finger/mouse and a 4× magnifier helps you hit the exact location.</div><div id="magnifier" class="magnifier"><canvas id="magCv" width="180" height="180"></canvas><div class="magCenter"></div></div>
+<div style="margin-top:8px"><button id="fit" class="secondary">Fit image</button><button id="downloadImage" class="secondary">Save annotated image</button></div></div>
+
+<div class="card">
+<div class="step">6. Quality control</div>
+<div id="qcDetails" class="small">Add control points to calculate calibration quality.</div>
+<div class="note">Four or more well-distributed control points are recommended. The perspective calculation uses normalized coordinates for numerical stability when Easting/Northing values are large. Residuals are a calibration check, not a substitute for authoritative survey control.</div>
+</div>
+
+<div class="card">
+<div class="step">7. Results</div>
+<span class="badge" id="crsBadge">CRS not selected</span>
+<span class="badge" id="unitBadge">Unit</span>
+<span class="badge" id="qcBadge">QC: waiting</span>
+<div style="overflow:auto;margin-top:8px">
+<table><thead><tr><th>Point</th><th>Easting</th><th>Northing</th><th>Distance</th><th>Bearing</th></tr></thead><tbody id="result"></tbody></table>
+</div>
+<div id="summary" class="small" style="margin-top:8px"></div>
+<button id="csv">Export CSV</button>
+<button id="save" class="secondary">Save project</button>
+<button id="load" class="secondary">Load project</button>
+<input id="loadFile" type="file" accept=".json" style="display:none">
+<button id="print" class="secondary">Print report</button>
+<button id="reset" class="secondary">Reset</button>
+</div>
+
+<div class="card">
+<div class="step">Online services (optional)</div>
+<p class="small">The georeferencing engine is local. Internet connectivity is optional and can later provide basemaps, map verification and updates without making the core application dependent on the internet.</p>
+</div>
+
+<div class="card">
+<div class="step">About / Credits / Copyright</div>
+<p><b>Ghana Site Plan Georeferencer</b><br>Created and developed by <b>Engr. Baah Lewis</b>.</p>
+<p class="credit"><b>Copyright © 2026 Engr. Baah Lewis. All Rights Reserved.</b><br>
+This software is made available for free public use worldwide. Public use does not transfer ownership or authorship. Users may use and share the official application, but must not claim the software as their own creation or remove/obscure the author attribution.</p>
+<p class="credit">This software is intended as a practical mapping and georeferencing aid. Always verify important coordinates against authoritative survey control and the requirements of the relevant Ghanaian authority before using results as survey-grade evidence.</p>
+<div class="note"><b>Attribution requirement:</b> Please keep the name <b>Engr. Baah Lewis</b> and the copyright notice visible when this software is copied, shared, embedded, or redistributed. Third-party libraries, map services, imagery and APIs remain subject to their own licences and terms.</div>
+<div class="note" style="margin-top:10px"><b>Offline:</b> The core georeferencing engine works locally. Online basemaps and other external services are optional and depend on their respective service availability and terms.</div>
+</div>
+</div>
+
+<script>
+(()=> {
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const file=document.getElementById('file'),status=document.getElementById('status');
+const e=document.getElementById('e'),n=document.getElementById('n');
+let img=null, controls=[], poly=[], mode='none', H=null, closed=false, cursor=null, pendingControl=null;
+const mag=document.getElementById('magnifier'),magCv=document.getElementById('magCv'),magCtx=magCv.getContext('2d');
+
+function resizeCanvas(){if(!img)return; const maxW=Math.min(1100,document.querySelector('.card').clientWidth-30); const s=Math.min(1,maxW/img.naturalWidth); cv.width=Math.round(img.naturalWidth*s);cv.height=Math.round(img.naturalHeight*s);draw();}
+function draw(){
+ if(!img)return;ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(img,0,0,cv.width,cv.height);
+ controls.forEach((p,i)=>{dot(p.x,p.y,'#1565c0',6);label(p.x,p.y,'G'+(i+1),'#1565c0')});
+ if(poly.length){ctx.strokeStyle='#d71920';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(poly[0].x,poly[0].y);for(let i=1;i<poly.length;i++)ctx.lineTo(poly[i].x,poly[i].y);if(closed)ctx.closePath();ctx.stroke();poly.forEach((p,i)=>{dot(p.x,p.y,'#d71920',5);label(p.x,p.y,'P'+(i+1),'#d71920')});}
+ if(cursor && (mode==='control'||mode==='poly')) drawCrosshair(cursor.x,cursor.y);
+}
+function drawCrosshair(x,y){const span=24,ring=11;ctx.save();ctx.strokeStyle='#fff';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-span,y);ctx.lineTo(x+span,y);ctx.moveTo(x,y-span);ctx.lineTo(x,y+span);ctx.stroke();ctx.strokeStyle='#d71920';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-span,y);ctx.lineTo(x+span,y);ctx.moveTo(x,y-span);ctx.lineTo(x,y+span);ctx.stroke();ctx.beginPath();ctx.arc(x,y,ring,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#d71920';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();ctx.restore()}
+function updateMagnifier(p,ev){if(!img || !(mode==='control'||mode==='poly')){mag.style.display='none';return}const sx=Math.max(0,Math.min(img.naturalWidth-90,p.x/(cv.width/img.naturalWidth)-45)),sy=Math.max(0,Math.min(img.naturalHeight-90,p.y/(cv.height/img.naturalHeight)-45));magCtx.clearRect(0,0,180,180);magCtx.imageSmoothingEnabled=true;magCtx.drawImage(img,sx,sy,90,90,0,0,180,180);let left=ev.clientX+18,top=ev.clientY+18;if(left+190>innerWidth)left=ev.clientX-208;if(top+190>innerHeight)top=ev.clientY-208;mag.style.left=Math.max(4,left)+'px';mag.style.top=Math.max(4,top)+'px';mag.style.display='block'}
+function dot(x,y,c,r){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+function label(x,y,t,c){ctx.fillStyle=c;ctx.font='bold 12px Arial';ctx.fillText(t,x+8,y-8)}
+function pointer(ev){const r=cv.getBoundingClientRect();return{x:(ev.clientX-r.left)*cv.width/r.width,y:(ev.clientY-r.top)*cv.height/r.height}}
+file.onchange=()=>{const f=file.files[0];if(!f)return;const im=new Image();im.onload=()=>{img=im;controls=[];poly=[];closed=false;H=null;mode='none';resizeCanvas();status.textContent='Image loaded. Enter known grid coordinates and add control points.';update()};im.src=URL.createObjectURL(f)};
+window.onresize=resizeCanvas;
+
+document.getElementById('addControl').onclick=()=>{if(!img)return alert('Load an image first.');const E=Number(String(e.value).replace(/,/g,'')),N=Number(String(n.value).replace(/,/g,''));if(!Number.isFinite(E)||!Number.isFinite(N))return alert('Enter valid Easting and Northing.');pendingControl={E,N};mode='control';cursor=null;status.textContent='CONTROL MODE ON: move the crosshair to the exact grid intersection, then TAP/CLICK the image to place the point.';draw()};
+cv.onpointermove=ev=>{if(!img)return;cursor=pointer(ev);updateMagnifier(cursor,ev);draw()};
+cv.onpointerleave=()=>{cursor=null;mag.style.display='none';draw()};
+cv.onpointerdown=ev=>{if(!img)return;const p=pointer(ev);cursor=p;if(mode==='control' && pendingControl){controls.push({x:p.x,y:p.y,E:pendingControl.E,N:pendingControl.N});pendingControl=null;mode='none';mag.style.display='none';status.textContent='Control point added successfully. Enter the next E/N and press Add control again.';update();draw()}else if(mode==='poly'&&!closed){poly.push(p);mag.style.display='none';draw();updateResults()}};
+
+document.getElementById('undoControl').onclick=()=>{controls.pop();H=null;recompute();update();draw()};
+document.getElementById('clearControls').onclick=()=>{controls=[];H=null;poly=[];closed=false;mode='none';update();draw()};
+document.getElementById('trace').onclick=()=>{if(!H)return alert('Add at least 3 non-collinear control points.');mode='poly';closed=false;cursor=null;status.textContent='Boundary mode: move the crosshair to each parcel corner. Use the magnifier, then tap/click to place the point.'};
+document.getElementById('undoPoly').onclick=()=>{poly.pop();closed=false;updateResults();draw()};
+document.getElementById('clearPoly').onclick=()=>{poly=[];closed=false;updateResults();draw()};
+document.getElementById('closePoly').onclick=()=>{if(poly.length>=3){closed=true;mode='none';updateResults();draw()}};
+
+function solveLinear(A,b){
+ const m=A.map((r,i)=>r.slice().concat(b[i])), n=m.length;
+ for(let i=0;i<n;i++){
+  let p=i; for(let j=i+1;j<n;j++) if(Math.abs(m[j][i])>Math.abs(m[p][i])) p=j;
+  if(Math.abs(m[p][i])<1e-12) throw Error('Controls are collinear or singular');
+  [m[i],m[p]]=[m[p],m[i]];
+  const q=m[i][i];
+  for(let k=i;k<=n;k++) m[i][k]/=q;
+  for(let j=0;j<n;j++) if(j!==i){
+   const q2=m[j][i];
+   for(let k=i;k<=n;k++) m[j][k]-=q2*m[i][k];
+  }
+ }
+ return m.map(r=>r[n]);
+}
+
+// VERSION 3 PROVEN ENGINE:
+// The original working prototype used a direct 3-point affine image->grid
+// transformation. We deliberately restore that calculation for boundary tracing.
+// G1-G3 define the transform; G4 is retained as an independent check point.
+function solve3(cs){
+ if(cs.length<3) throw Error('At least three control points are required.');
+ const a=cs[0], b=cs[1], c=cs[2];
+ const A=[[a.x,a.y,1],[b.x,b.y,1],[c.x,c.y,1]];
+ const Bx=[a.E,b.E,c.E], By=[a.N,b.N,c.N];
+ return {type:'version3Affine',x:solveLinear(A,Bx),y:solveLinear(A,By),used:3};
+}
+function recompute(){
+ if(controls.length>=3){
+  try{H=solve3(controls)}catch(_){H=null}
+ } else H=null;
+}
+function xyToEN(p){
+ if(!H)return null;
+ return {
+  E:H.x[0]*p.x+H.x[1]*p.y+H.x[2],
+  N:H.y[0]*p.x+H.y[1]*p.y+H.y[2]
+ };
+}
+function dist(a,b){return Math.hypot(b.E-a.E,b.N-a.N)}
+function bearing(a,b){return (Math.atan2(b.E-a.E,b.N-a.N)*180/Math.PI+360)%360}
+function area(pts){let s=0;for(let i=0;i<pts.length;i++){let q=pts[(i+1)%pts.length];s+=pts[i].E*q.N-q.E*pts[i].N}return Math.abs(s)/2}
+function updateResults(){
+ const r=document.getElementById('result');r.innerHTML='';if(!H)return;
+ const pts=poly.map(xyToEN);let per=0;
+ pts.forEach((p,i)=>{let last=i<pts.length-1?pts[i+1]:(closed?pts[0]:null);let d=last?dist(p,last):null;let br=last?bearing(p,last):null;if(d)per+=d;r.insertAdjacentHTML('beforeend',`<tr><td>P${i+1}</td><td>${p.E.toFixed(3)}</td><td>${p.N.toFixed(3)}</td><td>${d===null?'—':d.toFixed(3)}</td><td>${br===null?'—':br.toFixed(2)+'°'}</td></tr>`)});
+ document.getElementById('summary').textContent=closed&&pts.length>=3?`Perimeter: ${per.toFixed(3)} ${unitText()} • Area: ${area(pts).toFixed(3)} ${unitText()}² • Georeferencing model: ${H.type==='version3Affine'?'Version 3 proven 3-point affine correction':'3-point affine calibration'}`:'';
+}
+function unitText(){return document.getElementById('unit').value==='ft'?'ft':'m'}
+function update(){
+ recompute();const list=document.getElementById('controlsList');list.innerHTML=controls.length?controls.map((p,i)=>`G${i+1}: E ${p.E.toFixed(3)}, N ${p.N.toFixed(3)} <button class="secondary" onclick="removeControl(${i})">remove</button>`).join('<br>'):'No control points yet.';
+ document.getElementById('trace').disabled=!H;document.getElementById('closePoly').disabled=poly.length<3;document.getElementById('undoPoly').disabled=!poly.length;
+ document.getElementById('qcBadge').textContent=controls.length>=4?'QC: 4-point local perspective model':'QC: basic calibration';document.getElementById('crsBadge').textContent=document.getElementById('crs').selectedOptions[0].text;document.getElementById('unitBadge').textContent='Unit: '+unitText();updateResults();const warn=document.getElementById('mapStatus');if(warn&&crs.value==='ghana_metric'&&controls.some(p=>Math.abs(p.E)>900000)){warn.textContent='Warning: these Eastings are unusually large for Ghana Metre Grid. If your plan shows values around 1,300,000 E and 419,000 N, select Ghana National Grid / Accra Datum (EPSG:2136) — Gold Coast feet before mapping.';warn.style.background='#fff3cd';}
+}
+window.removeControl=i=>{controls.splice(i,1);poly=[];closed=false;update();draw()};
+document.getElementById('crs').onchange=()=>{window.convertedPoints=null;if(crs.value==='ghana_metric')unit.value='m';if(crs.value==='ghana_ng')unit.value='ft';update();};document.getElementById('unit').onchange=update;
+
+document.getElementById('csv').onclick=()=>{
+ if(!H||poly.length<3)return alert('Complete calibration and boundary first.');
+ const pts=poly.map(xyToEN);let s='Point,Easting,Northing,Distance,Bearing\\n';pts.forEach((p,i)=>{const q=pts[(i+1)%pts.length],d=closed?dist(p,q):i<pts.length-1?dist(p,q):null,br=closed?bearing(p,q):i<pts.length-1?bearing(p,q):null;s+=`P${i+1},${p.E.toFixed(3)},${p.N.toFixed(3)},${d==null?'':d.toFixed(3)},${br==null?'':br.toFixed(2)}\\n`});download('site_plan_coordinates.csv',s,'text/csv')
+};
+document.getElementById('save').onclick=()=>{
+ const data={version:2,creator:'Engr. Baah Lewis',project:project.value,prepared:prepared.value,crs:crs.value,unit:unit.value,controls,poly,closed};download('ghana_site_plan_project.json',JSON.stringify(data,null,2),'application/json')
+};
+document.getElementById('load').onclick=()=>document.getElementById('loadFile').click();
+document.getElementById('loadFile').onchange=ev=>{const f=ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);project.value=d.project||'';prepared.value=d.prepared||'Engr. Baah Lewis';crs.value=d.crs||'ghana_metric';unit.value=d.unit||'m';controls=d.controls||[];poly=d.poly||[];closed=!!d.closed;recompute();update();draw();status.textContent='Project data loaded. Load the same image separately to display it.'}catch(e){alert('Could not load project file.')}};rd.readAsText(f)};
+document.getElementById('print').onclick=()=>window.print();
+document.getElementById('reset').onclick=()=>location.reload();
+function download(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click()}
+function wgs84ToUTM(lat,lon,zone){
+ const a=6378137, f=1/298.257223563, k0=.9996, e2=f*(2-f), ep2=e2/(1-e2);
+ const p=lat*Math.PI/180,L=lon*Math.PI/180,L0=((zone*6-183)*Math.PI/180);
+ const s=Math.sin(p),c=Math.cos(p),t=Math.tan(p),N=a/Math.sqrt(1-e2*s*s),T=t*t,C=ep2*c*c,A=c*(L-L0);
+ const M=a*((1-e2/4-3*e2*e2/64-5*e2**3/256)*p-(3*e2/8+3*e2*e2/32+45*e2**3/1024)*Math.sin(2*p)+(15*e2*e2/256+45*e2**3/1024)*Math.sin(4*p)-(35*e2**3/3072)*Math.sin(6*p));
+ return {E:500000+k0*N*(A+(1-T+C)*A**3/6+(5-18*T+T*T+72*C-58*ep2)*A**5/120),
+ N:k0*(M+N*t*(A*A/2+(5-T+9*C+4*C*C)*A**4/24+(61-58*T+T*T+600*C-330*ep2)*A**6/720))};
+}
+function utmToWGS84(E,N,zone){
+ const a=6378137,f=1/298.257223563,k0=.9996,e2=f*(2-f),ep2=e2/(1-e2),M=N/k0;
+ const mu=M/(a*(1-e2/4-3*e2*e2/64-5*e2**3/256));
+ const e1=(1-Math.sqrt(1-e2))/(1+Math.sqrt(1-e2));
+ const p1=mu+(3*e1/2-27*e1**3/32)*Math.sin(2*mu)+(21*e1*e1/16-55*e1**4/32)*Math.sin(4*mu)+(151*e1**3/96)*Math.sin(6*mu)+(1097*e1**4/512)*Math.sin(8*mu);
+ const s=Math.sin(p1),c=Math.cos(p1),t=Math.tan(p1),C=ep2*c*c,T=t*t,N1=a/Math.sqrt(1-e2*s*s),R1=a*(1-e2)/Math.pow(1-e2*s*s,1.5),D=(E-500000)/(N1*k0);
+ const lat=p1-(N1*t/R1)*(D*D/2-(5+3*T+10*C-4*C*C-9*ep2)*D**4/24+(61+90*T+298*C+45*T*T-252*ep2-3*C*C)*D**6/720);
+ const lon=(zone*6-183)*Math.PI/180+(D-(1+2*T+C)*D**3/6+(5-2*C+28*T-3*C*C+8*ep2+24*T*T)*D**5/120)/c;
+ return {lat:lat*180/Math.PI,lon:lon*180/Math.PI};
+}
+function dxfFor(points,unit){
+ let factor=unit==='ft'?3.280839895013123:1;
+ let s='0\\nSECTION\\n2\\nHEADER\\n0\\nENDSEC\\n0\\nSECTION\\n2\\nENTITIES\\n';
+ s+='0\\nLWPOLYLINE\\n8\\nSITE_BOUNDARY\\n90\\n'+points.length+'\\n70\\n1\\n';
+ points.forEach(p=>{s+='10\\n'+(p.E*factor).toFixed(6)+'\\n20\\n'+(p.N*factor).toFixed(6)+'\\n'});
+ s+='0\\nENDSEC\\n0\\nEOF\\n';return s;
+}
+function sourcePoints(){
+ if(!H||poly.length<3)return [];
+ return poly.map(xyToEN);
+}
+function convertPoint(p,src,dst){
+ if(dst==='same')return {E:p.E,N:p.N,label:src};
+ if(src===dst)return {E:p.E,N:p.N,label:dst};
+ // Direct linear unit conversion for Ghana grid variants when they share the same datum/grid geometry.
+ if(src==='ghana_ng' && dst==='ghana_metric')return {E:p.E*0.3047997101815,N:p.N*0.3047997101815,label:dst};
+ if(src==='ghana_metric' && dst==='ghana_ng')return {E:p.E/0.3047997101815,N:p.N/0.3047997101815,label:dst};
+ // UTM <-> geographic is supported. Other datum/grid transformations require authoritative control.
+ if(src==='geographic' && (dst==='utm30'||dst==='utm31')){
+   const q=wgs84ToUTM(p.N,p.E,dst==='utm30'?30:31);return {E:q.E,N:q.N,label:dst};
+ }
+ if((src==='utm30'||src==='utm31') && dst==='geographic'){
+   const q=utmToWGS84(p.E,p.N,src==='utm30'?30:31);return {E:q.lon,N:q.lat,label:dst};
+ }
+ return null;
+}
+document.getElementById('outCrs').onchange=()=>{
+ document.getElementById('geoInput').style.display=document.getElementById('outCrs').value==='geographic'||document.getElementById('outCrs').value==='utm30'||document.getElementById('outCrs').value==='utm31'?'block':'none';
+};
+document.getElementById('convert').onclick=()=>{
+ const pts=sourcePoints();if(pts.length<3)return alert('Complete calibration and boundary first.');
+ const dst=document.getElementById('outCrs').value,src=document.getElementById('crs').value;
+ let out=[];
+ if(dst==='utm30'||dst==='utm31'||dst==='geographic'){
+   // If source is geographic, coordinates are E=longitude,N=latitude. Otherwise request explicit reference
+   if(src!=='geographic' && src!==dst){
+     const lat=+document.getElementById('refLat').value,lon=+document.getElementById('refLon').value;
+     if(!Number.isFinite(lat)||!Number.isFinite(lon))return alert('For a UTM/geographic conversion, provide a WGS84 reference latitude and longitude or use a known geographic source.');
+     return document.getElementById('conversionStatus').textContent='Reference supplied. For rigorous datum transformation, use surveyed control points; no unsupported datum shift is being guessed.';
+   }
+ }
+ out=pts.map(p=>convertPoint(p,src,dst));
+ if(out.some(x=>!x)){document.getElementById('conversionStatus').textContent='This conversion needs an authoritative datum transformation or additional control. The app will not silently guess it.';return;}
+ window.convertedPoints=out;
+ document.getElementById('conversionStatus').textContent=`Converted ${out.length} boundary points to ${document.getElementById('outCrs').selectedOptions[0].text}.`;
+ if(leafletMap)showBoundaryOnMap();
+};
+document.getElementById('dxf').onclick=()=>{
+ let pts=window.convertedPoints||sourcePoints();
+ if(pts.length<3)return alert('Complete the boundary first. Use Convert output if you want a different coordinate system.');
+ const u=document.getElementById('cadUnit').value;
+ download('Ghana_Site_Plan_Boundary.dxf',dxfFor(pts,u),'application/dxf');
+};
+
+let leafletMap=null, leafletBoundary=null, leafletMarkers=[], controlMarkers=[], manualMarkers=[], manualLine=null, satelliteLayer=null, osmLayer=null;
+function setMapStatus(t,ok=false){const e=document.getElementById('mapStatus');if(e){e.textContent=t;e.style.background=ok?'#eef8ee':'#eef6ff';}}
+const MAP_CRS_DEFS={
+ 'ghana_metric':'+proj=tmerc +lat_0=4.66666666666667 +lon_0=-1 +k=0.99975 +x_0=274319.51 +y_0=0 +a=6378249.145 +rf=293.465 +towgs84=-130,29,364,0,0,0,0 +units=m +no_defs +type=crs',
+ 'ghana_ng':'+proj=tmerc +lat_0=4.66666666666667 +lon_0=-1 +k=0.99975 +x_0=274319.739163358 +y_0=0 +a=6378300 +rf=296 +towgs84=-170,33,326,0,0,0,0 +to_meter=0.304799710181509 +no_defs +type=crs',
+ 'utm30':'+proj=utm +zone=30 +datum=WGS84 +units=m +no_defs +type=crs',
+ 'utm31':'+proj=utm +zone=31 +datum=WGS84 +units=m +no_defs +type=crs'
+};
+function projectPointToWGS(p,src){
+ if(src==='geographic') return {lat:p.N,lng:p.E};
+ if(!window.proj4) throw new Error('Coordinate projection library is not available. Connect to the internet and reload.');
+ const def=MAP_CRS_DEFS[src];
+ if(!def) throw new Error('This source coordinate system cannot be mapped automatically.');
+ const q=proj4(def,'EPSG:4326',[p.E,p.N]);
+ if(!Number.isFinite(q[0])||!Number.isFinite(q[1])||Math.abs(q[0])>180||Math.abs(q[1])>90) throw new Error('The coordinates produced an invalid geographic position. Check the selected CRS and grid units.');
+ return {lat:q[1],lng:q[0]};
+}
+function geographicSpread(ll){
+ if(ll.length<2)return {dLat:0,dLng:0,km:0};
+ let minLat=Infinity,maxLat=-Infinity,minLng=Infinity,maxLng=-Infinity;
+ ll.forEach(p=>{minLat=Math.min(minLat,p.lat);maxLat=Math.max(maxLat,p.lat);minLng=Math.min(minLng,p.lng);maxLng=Math.max(maxLng,p.lng);});
+ const latKm=(maxLat-minLat)*111.32, lngKm=(maxLng-minLng)*111.32*Math.cos(((minLat+maxLat)/2)*Math.PI/180);
+ return {dLat:maxLat-minLat,dLng:maxLng-minLng,km:Math.hypot(latKm,lngKm)};
+}
+function runCRSCheck(){
+ const box=document.getElementById('crsCheck'); if(!box||controls.length<3)return;
+ if(!window.proj4){box.textContent='Connect to the internet so the coordinate consistency check can run.';return;}
+ const rows=[];
+ ['ghana_ng','ghana_metric'].forEach(k=>{try{const ll=controls.map(p=>projectPointToWGS({E:p.E,N:p.N},k));const sp=geographicSpread(ll);rows.push({k,sp,ll});}catch(e){rows.push({k,err:e.message});}});
+ const selected=document.getElementById('crs').value;const cur=rows.find(r=>r.k===selected);
+ let html=rows.map(r=>{const name=r.k==='ghana_ng'?'EPSG:2136 Ghana National Grid / Accra Datum':'EPSG:25000 Ghana Metre Grid / Leigon';return r.err?`<b>${name}</b>: ${r.err}`:`<b>${name}</b>: control-point envelope ≈ <b>${r.sp.km.toFixed(2)} km</b> across (${r.sp.dLat.toFixed(4)}° lat × ${r.sp.dLng.toFixed(4)}° lon).`;}).join('<br>');
+ if(cur&&!cur.err){const s=cur.sp;if(s.km>20)html+=`<br><span style="color:#8a1c1c"><b>Warning:</b> the selected CRS places the control points more than 20 km apart. If the printed grid points on the plan are physically close, check the CRS, units, and the digits entered.</span>`;else html+=`<br><span style="color:#146c2e"><b>Selected CRS check:</b> the projected control points are geographically close enough to inspect as one site.</span>`;}
+ box.innerHTML=html;
+}
+function projectBoundaryToWGS(points){
+ const src=document.getElementById('crs').value;
+ return points.map(p=>projectPointToWGS(p,src));
+}
+function ensureMapLayers(){
+ if(!satelliteLayer) satelliteLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri — Esri, Maxar, Earthstar Geographics, and the GIS User Community'});
+ if(!osmLayer) osmLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'});
+}
+function setBaseLayer(){
+ if(!leafletMap)return;
+ ensureMapLayers();
+ const type=document.getElementById('mapType').value;
+ [satelliteLayer,osmLayer].forEach(l=>{if(l&&leafletMap.hasLayer(l))leafletMap.removeLayer(l);});
+ if(type==='satellite'||type==='hybrid') satelliteLayer.addTo(leafletMap);
+ if(type==='osm') osmLayer.addTo(leafletMap);
+}
+function clearMapGraphics(){
+ if(leafletBoundary){leafletBoundary.remove();leafletBoundary=null;}
+ leafletMarkers.forEach(m=>m.remove());leafletMarkers=[];
+ controlMarkers.forEach(m=>m.remove());controlMarkers=[];
+}
+function clearManualPlot(){
+ manualMarkers.forEach(m=>m.remove()); manualMarkers=[];
+ if(manualLine){manualLine.remove();manualLine=null;}
+ const st=document.getElementById('plotStatus'); if(st)st.textContent='Manual plotted coordinates cleared.';
+}
+function parseManualCoordinates(){
+ const raw=document.getElementById('plotCoords').value.trim();
+ if(!raw) throw new Error('Paste at least one coordinate pair first.');
+ const src0=document.getElementById('plotCrs').value;
+ const src=src0==='same'?document.getElementById('crs').value:src0;
+ if(src==='custom') throw new Error('Custom CRS cannot be plotted automatically. Choose a known Ghana, UTM or geographic CRS.');
+ const lines=raw.split(/\\r?\\n/).map(x=>x.trim()).filter(Boolean);
+ const pts=[];
+ for(let line of lines){
+   // Remove common labels and CSV prefixes such as P1, G1, Point 1.
+   line=line.replace(/^\\s*(?:P|G|Point)\\s*\\d+\\s*[,;:\\t ]+/i,'');
+   const nums=line.match(/[-+]?\\d+(?:[.,]\\d+)?(?:[eE][-+]?\\d+)?/g);
+   if(!nums||nums.length<2) continue;
+   // If a number uses thousands separators like 1,303,000, the regex can split it;
+   // normalize the entire line as a CSV/whitespace pair first.
+   let pair=[];
+   if(/[-+]?\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?\\s*[,;\\t ]+[-+]?\\d+(?:\\.\\d+)?/.test(line)){
+     const m=line.match(/([-+]?\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?)\\s*[,;\\t ]+([-+]?\\d+(?:\\.\\d+)?)/);
+     if(m) pair=[parseFloat(m[1].replace(/,/g,'')),parseFloat(m[2])];
+   }
+   if(pair.length!==2){
+     const clean=line.replace(/;/g,',').replace(/\\s+/g,',');
+     const vals=clean.split(',').map(x=>x.trim()).filter(Boolean);
+     if(vals.length>=2 && vals.slice(0,2).every(x=>/^[-+]?\\d+(?:\\.\\d+)?(?:[eE][-+]?\\d+)?$/.test(x))) pair=[parseFloat(vals[0]),parseFloat(vals[1])];
+   }
+   if(pair.length!==2 && nums.length>=2) pair=[parseFloat(nums[0].replace(/,/g,'')),parseFloat(nums[1].replace(/,/g,''))];
+   if(pair.length===2 && pair.every(Number.isFinite)){
+     const a=pair[0],b=pair[1];
+     if(src==='geographic') pts.push({lat:a,lng:b}); else pts.push(projectPointToWGS({E:a,N:b},src));
+   }
+ }
+ if(!pts.length) throw new Error('No usable coordinate pairs were found. Use one X,Y pair per line.');
+ if(pts.some(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lng)||Math.abs(p.lat)>90||Math.abs(p.lng)>180)) throw new Error('One or more coordinates are outside valid latitude/longitude limits. Check the CRS and coordinate order.');
+ return {pts,src};
+}
+function plotManualCoordinates(){
+ if(!leafletMap){setMapStatus('Load the map first, then plot the coordinates.');return;}
+ try{
+   const {pts,src}=parseManualCoordinates();
+   clearManualPlot();
+   const bounds=L.latLngBounds([]);
+   pts.forEach((p,i)=>{
+     const m=L.circleMarker([p.lat,p.lng],{radius:8,color:'#7a1fa2',weight:3,fillColor:'#fff',fillOpacity:1}).addTo(leafletMap)
+       .bindTooltip('M'+(i+1)+'  •  '+p.lat.toFixed(7)+', '+p.lng.toFixed(7),{permanent:true,direction:'top',offset:[0,-5]});
+     manualMarkers.push(m); bounds.extend([p.lat,p.lng]);
+   });
+   if(pts.length>=2) manualLine=L.polyline(pts.map(p=>[p.lat,p.lng]),{color:'#7a1fa2',weight:3,dashArray:'7 6'}).addTo(leafletMap);
+   if(pts.length>=3 && src!=='geographic') manualLine=L.polygon(pts.map(p=>[p.lat,p.lng]),{color:'#7a1fa2',weight:3,fillColor:'#7a1fa2',fillOpacity:.08,dashArray:'7 6'}).addTo(leafletMap);
+   if(bounds.isValid()) leafletMap.fitBounds(bounds,{padding:[55,55],maxZoom:19});
+   document.getElementById('plotStatus').textContent=`Plotted ${pts.length} coordinate point${pts.length===1?'':'s'} from ${src==='ghana_ng'?'EPSG:2136 Ghana National Grid':src==='ghana_metric'?'EPSG:25000 Ghana Metre Grid':src==='utm30'?'EPSG:32630 UTM 30N':src==='utm31'?'EPSG:32631 UTM 31N':'WGS84 latitude/longitude'}. Purple M1, M2… markers are the manually pasted coordinates.`;
+ }catch(e){document.getElementById('plotStatus').textContent=e.message;}
+}
+document.getElementById('plotManual').onclick=plotManualCoordinates;
+document.getElementById('clearManual').onclick=clearManualPlot;
+document.getElementById('copyBoundaryToPlot').onclick=()=>{
+ if(!poly.length)return alert('Trace a boundary first.');
+ const pts=sourcePoints();
+ document.getElementById('plotCrs').value='same';
+ document.getElementById('plotCoords').value=pts.map(p=>`${p.E.toFixed(3)},${p.N.toFixed(3)}`).join('\\n');
+ document.getElementById('plotStatus').textContent=`Copied ${pts.length} CLEAN coordinate pairs only (Easting, Northing). Distance, bearing and area are NOT copied. Click “Plot coordinates on satellite”.`;
+};
+function showGeorefOnMap(){
+ if(!leafletMap){setMapStatus('Load the map first.');return;}
+ if(!H||controls.length<3){setMapStatus('Add at least 3 accurate control points and calibrate the plan first.');return;}
+ const src=document.getElementById('crs').value;
+ if(src==='custom'){setMapStatus('Custom CRS cannot be placed on the global map automatically. Select a known Ghana/UTM/geographic CRS.');return;}
+ let controlLL=[];
+ try{controlLL=controls.map(p=>projectPointToWGS({E:p.E,N:p.N},src));}catch(e){setMapStatus(e.message);return;}
+ let boundaryLL=[];
+ if(poly.length>=3){try{boundaryLL=projectBoundaryToWGS(sourcePoints());}catch(e){setMapStatus(e.message);return;}}
+ clearMapGraphics();
+ const bounds=L.latLngBounds([]);
+ controlLL.forEach((p,i)=>{
+   const m=L.circleMarker([p.lat,p.lng],{radius:9,color:'#0057b8',weight:3,fillColor:'#ffffff',fillOpacity:1}).addTo(leafletMap)
+     .bindTooltip('G'+(i+1)+'  •  E '+controls[i].E.toFixed(3)+'  N '+controls[i].N.toFixed(3),{permanent:false,direction:'top'});
+   controlMarkers.push(m);bounds.extend([p.lat,p.lng]);
+ });
+ if(boundaryLL.length>=3){
+   leafletBoundary=L.polygon(boundaryLL.map(p=>[p.lat,p.lng]),{color:'#d71920',weight:4,fillColor:'#d71920',fillOpacity:.12}).addTo(leafletMap);
+   boundaryLL.forEach((p,i)=>{
+     const m=L.circleMarker([p.lat,p.lng],{radius:6,color:'#d71920',weight:2,fillColor:'#ffffff',fillOpacity:1}).addTo(leafletMap).bindTooltip('P'+(i+1),{permanent:true,direction:'center',className:'boundaryNumber'});
+     leafletMarkers.push(m);bounds.extend([p.lat,p.lng]);
+   });
+ }
+ if(bounds.isValid()) leafletMap.fitBounds(bounds,{padding:[45,45],maxZoom:18});
+ const c=controlLL[0];
+ setMapStatus((boundaryLL.length>=3?'Georeferenced control points and parcel boundary':'Georeferenced control points')+' placed at their projected WGS84 positions on the map.',true);
+}
+function initMap(){
+ try{
+  if(!window.L){setMapStatus('The online map library did not load. Check your internet connection and reload the app.');return;}
+  if(!leafletMap){leafletMap=L.map('map',{center:[5.6037,-0.1870],zoom:11,zoomControl:true});ensureMapLayers();}
+  setBaseLayer();
+  setMapStatus('Map loaded. Your georeferenced control points will be positioned using the selected CRS.',true);
+  showGeorefOnMap();
+  setTimeout(()=>leafletMap.invalidateSize(),100);
+ }catch(e){setMapStatus('The map could not be loaded. Check your internet connection.');}
+}
+document.getElementById('loadMap').onclick=initMap;
+document.getElementById('fitMap').onclick=showGeorefOnMap;
+document.getElementById('mapType').onchange=()=>{if(!leafletMap)initMap();else{setBaseLayer();showGeorefOnMap();}};
+function updateNetworkStatus(){
+ const el=document.getElementById('netStatus');
+ if(navigator.onLine){el.textContent='Connection mode: ONLINE — optional online features can be used.';el.style.background='#eef8ee'}
+ else{el.textContent='Connection mode: OFFLINE — core georeferencing continues to work without internet.';el.style.background='#fff9e8'}
+}
+window.addEventListener('online',updateNetworkStatus);
+window.addEventListener('offline',updateNetworkStatus);
+updateNetworkStatus();
+
+function calibrationResiduals(){
+ if(!H || controls.length<3)return null;
+ return controls.map(p=>{const q=xyToEN({x:p.x,y:p.y});const de=q.E-p.E,dn=q.N-p.N;return {de,dn,r:Math.hypot(de,dn)}});
+}
+function updateQC(){
+ const box=document.getElementById('qcDetails');
+ if(!box)return;
+ const rs=calibrationResiduals();
+ if(!rs){box.textContent='Add at least 3 non-collinear control points. Four or more are recommended for perspective correction.';return}
+ const rms=Math.sqrt(rs.reduce((s,x)=>s+x.r*x.r,0)/rs.length);
+ const max=Math.max(...rs.map(x=>x.r));
+ box.innerHTML=`Model: <b>${H.type==='version3Affine'?'Version 3 proven 3-point affine correction':'3-point affine calibration'}</b> • Points: <b>${rs.length}</b> • RMS residual: <b>${rms.toFixed(4)}</b> • Maximum: <b>${max.toFixed(4)}</b> ${unitText()}<br>`+
+ rs.map((x,i)=>`G${i+1}: ΔE ${x.de.toFixed(4)}, ΔN ${x.dn.toFixed(4)}, r ${x.r.toFixed(4)}`).join(' &nbsp; | &nbsp; ');
+}
+const originalUpdate=update;
+update=function(){originalUpdate();updateQC();runCRSCheck();if(leafletMap&&H&&controls.length>=3)showGeorefOnMap();};
+
+document.getElementById('fit').onclick=()=>{resizeCanvas();status.textContent='Image fitted to the workspace.'};
+document.getElementById('downloadImage').onclick=()=>{
+ if(!img)return alert('Load an image first.');
+ const a=document.createElement('a');a.download='annotated_site_plan.png';a.href=cv.toDataURL('image/png');a.click();
+};
+
+})();
+</script>
+
+<footer style="margin-top:18px;padding:16px;background:#17324d;color:#fff;text-align:center;font-size:12px">
+  <div><b>Ghana Site Plan Georeferencer</b></div>
+  <div>Created and developed by <b>Engr. Baah Lewis</b></div>
+  <div style="margin-top:4px">Copyright © 2026 Engr. Baah Lewis. All Rights Reserved.</div>
+  <div style="margin-top:5px;opacity:.9">Free public use with attribution • Authorship remains with Engr. Baah Lewis</div>
+</footer>
+</body></html>

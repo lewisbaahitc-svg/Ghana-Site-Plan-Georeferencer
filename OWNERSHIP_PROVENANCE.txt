@@ -1,0 +1,13 @@
+DIGITAL OWNERSHIP / PROVENANCE RECORD
+
+Project: Ghana Site Plan Georeferencer
+Creator/Developer: Engr. Baah Lewis
+Copyright: © 2026 Engr. Baah Lewis. All Rights Reserved.
+Publication record date: 2026-10-07
+
+SHA-256 hash of the published HTML file:
+520826dfb2fb2f217e4c494833c5861d44446ce472912a3270b041c8cfc91feb
+
+This hash is a fingerprint of the exact HTML file included in this publication pack. If the file contents change, its SHA-256 hash will change.
+
+For stronger evidence of authorship and publication history, retain the original source files, dated backups, Git commit history, release records, and any formal copyright registration/deposit documentation.
