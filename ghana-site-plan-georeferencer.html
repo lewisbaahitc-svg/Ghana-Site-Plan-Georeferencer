@@ -14,7 +14,7 @@
 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ghana Site Plan Georeferencer — Engr. Baah Lewis | Version 3 Engine</title>
+<title>Ghana Site Plan Georeferencer — Engr. Baah Lewis</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f5f7;color:#17202a}
 header{background:#17324d;color:#fff;padding:18px}.wrap{max-width:1150px;margin:auto;padding:14px}
@@ -43,7 +43,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px
 <body>
 <header><div class="wrap">
 <h1>Ghana Site Plan Georeferencer</h1>
-<div class="sub">Professional Version 3 Engine • Created and developed by <b>Engr. Baah Lewis</b> • © 2026 Engr. Baah Lewis • Free public use with attribution</div>
+<div class="sub">Professional Georeferencing Tool • Created and developed by <b>Engr. Baah Lewis</b> • © 2026 Engr. Baah Lewis • Free public use with attribution</div>
 <div style="margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.35);border-radius:8px;font-size:12px;background:rgba(255,255,255,.08)"><b>AUTHORSHIP &amp; COPYRIGHT:</b> © 2026 Engr. Baah Lewis. This software is made available for public use; authorship and attribution remain with Engr. Baah Lewis.</div>
 </div></header>
 <div class="wrap">
@@ -256,7 +256,7 @@ function solveLinear(A,b){
  return m.map(r=>r[n]);
 }
 
-// VERSION 3 PROVEN ENGINE:
+// AFFINE COORDINATE ENGINE:
 // The original working prototype used a direct 3-point affine image->grid
 // transformation. We deliberately restore that calculation for boundary tracing.
 // G1-G3 define the transform; G4 is retained as an independent check point.
@@ -265,7 +265,7 @@ function solve3(cs){
  const a=cs[0], b=cs[1], c=cs[2];
  const A=[[a.x,a.y,1],[b.x,b.y,1],[c.x,c.y,1]];
  const Bx=[a.E,b.E,c.E], By=[a.N,b.N,c.N];
- return {type:'version3Affine',x:solveLinear(A,Bx),y:solveLinear(A,By),used:3};
+ return {type:'affine3pt',x:solveLinear(A,Bx),y:solveLinear(A,By),used:3};
 }
 function recompute(){
  if(controls.length>=3){
@@ -286,7 +286,7 @@ function updateResults(){
  const r=document.getElementById('result');r.innerHTML='';if(!H)return;
  const pts=poly.map(xyToEN);let per=0;
  pts.forEach((p,i)=>{let last=i<pts.length-1?pts[i+1]:(closed?pts[0]:null);let d=last?dist(p,last):null;let br=last?bearing(p,last):null;if(d)per+=d;r.insertAdjacentHTML('beforeend',`<tr><td>P${i+1}</td><td>${p.E.toFixed(3)}</td><td>${p.N.toFixed(3)}</td><td>${d===null?'—':d.toFixed(3)}</td><td>${br===null?'—':br.toFixed(2)+'°'}</td></tr>`)});
- document.getElementById('summary').textContent=closed&&pts.length>=3?`Perimeter: ${per.toFixed(3)} ${unitText()} • Area: ${area(pts).toFixed(3)} ${unitText()}² • Georeferencing model: ${H.type==='version3Affine'?'Version 3 proven 3-point affine correction':'3-point affine calibration'}`:'';
+ document.getElementById('summary').textContent=closed&&pts.length>=3?`Perimeter: ${per.toFixed(3)} ${unitText()} • Area: ${area(pts).toFixed(3)} ${unitText()}² • Georeferencing model: ${H.type==='affine3pt'?'3-point affine correction':'3-point affine calibration'}`:'';
 }
 function unitText(){return document.getElementById('unit').value==='ft'?'ft':'m'}
 function update(){
@@ -562,7 +562,7 @@ function updateQC(){
  if(!rs){box.textContent='Add at least 3 non-collinear control points. Four or more are recommended for perspective correction.';return}
  const rms=Math.sqrt(rs.reduce((s,x)=>s+x.r*x.r,0)/rs.length);
  const max=Math.max(...rs.map(x=>x.r));
- box.innerHTML=`Model: <b>${H.type==='version3Affine'?'Version 3 proven 3-point affine correction':'3-point affine calibration'}</b> • Points: <b>${rs.length}</b> • RMS residual: <b>${rms.toFixed(4)}</b> • Maximum: <b>${max.toFixed(4)}</b> ${unitText()}<br>`+
+ box.innerHTML=`Model: <b>${H.type==='affine3pt'?'3-point affine correction':'3-point affine calibration'}</b> • Points: <b>${rs.length}</b> • RMS residual: <b>${rms.toFixed(4)}</b> • Maximum: <b>${max.toFixed(4)}</b> ${unitText()}<br>`+
  rs.map((x,i)=>`G${i+1}: ΔE ${x.de.toFixed(4)}, ΔN ${x.dn.toFixed(4)}, r ${x.r.toFixed(4)}`).join(' &nbsp; | &nbsp; ');
 }
 const originalUpdate=update;
