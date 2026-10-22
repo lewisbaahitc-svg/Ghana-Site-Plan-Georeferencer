@@ -90,7 +90,8 @@ table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px
 <div><label>Reference longitude (WGS84)</label><input id="refLon" type="number" step="any" placeholder="e.g. -0.1870"></div>
 </div>
 <button id="convert">Convert output</button>
-<button id="dxf" class="secondary">Export AutoCAD DXF</button>
+<button id="dxf" class="secondary">Download AutoCAD DXF</button>
+<p class="small">Exports the traced parcel as an AutoCAD-compatible 2D polyline (.dxf). In AutoCAD, use OPEN and select the downloaded DXF file. Choose a projected grid, not latitude/longitude, for normal CAD drafting.</p>
 <div id="conversionStatus" class="status">Choose an output system and complete a boundary.</div>
 </div>
 
@@ -327,12 +328,17 @@ function utmToWGS84(E,N,zone){
  const lon=(zone*6-183)*Math.PI/180+(D-(1+2*T+C)*D**3/6+(5-2*C+28*T-3*C*C+8*ep2+24*T*T)*D**5/120)/c;
  return {lat:lat*180/Math.PI,lon:lon*180/Math.PI};
 }
-function dxfFor(points,unit){
- let factor=unit==='ft'?3.280839895013123:1;
- let s='0\\nSECTION\\n2\\nHEADER\\n0\\nENDSEC\\n0\\nSECTION\\n2\\nENTITIES\\n';
- s+='0\\nLWPOLYLINE\\n8\\nSITE_BOUNDARY\\n90\\n'+points.length+'\\n70\\n1\\n';
- points.forEach(p=>{s+='10\\n'+(p.E*factor).toFixed(6)+'\\n20\\n'+(p.N*factor).toFixed(6)+'\\n'});
- s+='0\\nENDSEC\\n0\\nEOF\\n';return s;
+function dxfFor(points,cadUnit,coordinateUnit){
+ // Write an ASCII AutoCAD R12 DXF using the widely supported POLYLINE/VERTEX
+ // entities. Every group code is on its own line, as required by DXF.
+ let factor=1;
+ if(coordinateUnit==='m' && cadUnit==='ft') factor=3.280839895013123;
+ else if(coordinateUnit==='ft' && cadUnit==='m') factor=0.304799710181509;
+ let s='0\nSECTION\n2\nHEADER\n9\n$ACADVER\n1\nAC1009\n9\n$INSUNITS\n70\n'+(cadUnit==='ft'?'2':'6')+'\n0\nENDSEC\n';
+ s+='0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n1\n0\nLAYER\n2\nSITE_BOUNDARY\n70\n0\n62\n1\n6\nCONTINUOUS\n0\nENDTAB\n0\nENDSEC\n';
+ s+='0\nSECTION\n2\nENTITIES\n0\nPOLYLINE\n8\nSITE_BOUNDARY\n66\n1\n70\n'+(document.getElementById('closed')?.checked===false?'0':'1')+'\n';
+ points.forEach(p=>{s+='0\nVERTEX\n8\nSITE_BOUNDARY\n10\n'+(p.E*factor).toFixed(6)+'\n20\n'+(p.N*factor).toFixed(6)+'\n30\n0.0\n'});
+ s+='0\nSEQEND\n0\nENDSEC\n0\nEOF\n';return s;
 }
 function sourcePoints(){
  if(!H||poly.length<3)return [];
@@ -376,9 +382,14 @@ document.getElementById('convert').onclick=()=>{
 };
 document.getElementById('dxf').onclick=()=>{
  let pts=window.convertedPoints||sourcePoints();
- if(pts.length<3)return alert('Complete the boundary first. Use Convert output if you want a different coordinate system.');
- const u=document.getElementById('cadUnit').value;
- download('Ghana_Site_Plan_Boundary.dxf',dxfFor(pts,u),'application/dxf');
+ if(pts.length<3)return alert('Complete the boundary first. Close the boundary and make sure at least three points are traced.');
+ const cadUnit=document.getElementById('cadUnit').value;
+ const outputCrs=window.convertedPoints?document.getElementById('outCrs').value:document.getElementById('crs').value;
+ if(outputCrs==='geographic')return alert('For AutoCAD drafting, convert the boundary to a projected grid (Ghana grid or UTM) first. Latitude/longitude degrees are not suitable as normal CAD drawing coordinates.');
+ const coordinateUnit=outputCrs==='ghana_ng'?'ft':'m';
+ const dxf=dxfFor(pts,cadUnit,coordinateUnit);
+ download('Ghana_Site_Plan_Boundary.dxf',dxf,'application/dxf');
+ document.getElementById('conversionStatus').textContent='DXF exported as an AutoCAD-compatible 2D boundary polyline. In AutoCAD, use OPEN and select the downloaded .dxf file.';
 };
 
 let leafletMap=null, leafletBoundary=null, leafletMarkers=[], controlMarkers=[], manualMarkers=[], manualLine=null, satelliteLayer=null, osmLayer=null;
